@@ -19,7 +19,7 @@ void setup() {
   pendulum.theta1 = 0.8;
   pendulum.omega1 = 0.0;
   pendulum.m1 = 1.0;
-  pendulum.l1 = 1.0;
+  pendulum.l1 = 0.7;
     
   pendulum.theta2 = 0.5;
   pendulum.omega2 = 0.0;
@@ -29,26 +29,33 @@ void setup() {
 
 void draw () {
   pendulum.updateTime(millis());
-  //ellipse(56, 46, 55, 55); 
+  background(0);
 
+  pushMatrix();
   //Draw pendulum
   translate(width/2, 0);
-  scale(100, 100);
 
   float x1 = pendulum.l1 * sin(pendulum.theta1);
   float y1 = pendulum.l1 * cos(pendulum.theta1);
   float x2 = x1 + pendulum.l2 * sin(pendulum.theta2);
   float y2 = y1 + pendulum.l2 * cos(pendulum.theta2);
   
-  //stroke(255,0,0);
-  //strokeWeight(0.01);
+  x1 *= 100;
+  y1 *= 100;
+  x2 *= 100;
+  y2 *= 100;
+  
+  stroke(255,0,0);
+  strokeWeight(1);
   line(0,0, x1, y1);
   line(x1, y1, x2, y2);
-  //noStroke();
+  noStroke();
   fill(0, 102, 153);
-  ellipse(x1, y1, 0.1, 0.1);
+  ellipse(x1, y1, 10, 10);
   fill(255, 204, 0);
-  ellipse(x2, y2, 0.1, 0.1);
+  ellipse(x2, y2, 10, 10);
+  
+  popMatrix();
   //stroke(0);
 }
 
@@ -121,8 +128,6 @@ class DoublePendulum{
     }
 
     void update(float newTime){
-      print ("hola2\n");
-      print(newTime, eTime, dt);
       do
       {
           float yin[] = { theta1, omega1, theta2, omega2 };
