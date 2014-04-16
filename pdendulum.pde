@@ -9,55 +9,96 @@ final int OMEGA_1 = 1;
 final int THETA_2 = 2;
 final int OMEGA_2 = 3;
 final int NUM_EQNS = 4;
+final int SHADE_SIZE = 250;
+
+ArrayList<PVector> shade;
 
 void setup() {
-  size(192, 157); 
+  size(192, 157, P3D); 
   background(0); 
   frameRate(25);
+
+  shade = new ArrayList<PVector>();
   
   //Initialize pendulum 
   pendulum.theta1 = 0.8;
   pendulum.omega1 = 0.0;
-  pendulum.m1 = 1.0;
-  pendulum.l1 = 0.7;
+  pendulum.m1 = 0.9;
+  pendulum.l1 = 0.9;
     
   pendulum.theta2 = 0.5;
   pendulum.omega2 = 0.0;
-  pendulum.m2 = 0.3;
-  pendulum.l2 = 0.6;
+  pendulum.m2 = 0.1;
+  pendulum.l2 = 0.45;
 }
 
 void draw () {
   pendulum.updateTime(millis());
   background(0);
+  lights();
 
+  //pointLight(255, 255, 255, 0, 0, 0);
   pushMatrix();
-  //Draw pendulum
-  translate(width/2, 0);
+    //Draw pendulum
+    translate(width/2, 0);
 
-  float x1 = pendulum.l1 * sin(pendulum.theta1);
-  float y1 = pendulum.l1 * cos(pendulum.theta1);
-  float x2 = x1 + pendulum.l2 * sin(pendulum.theta2);
-  float y2 = y1 + pendulum.l2 * cos(pendulum.theta2);
-  
-  x1 *= 100;
-  y1 *= 100;
-  x2 *= 100;
-  y2 *= 100;
-  
-  stroke(255,0,0);
-  strokeWeight(1);
-  line(0,0, x1, y1);
-  line(x1, y1, x2, y2);
-  noStroke();
-  fill(0, 102, 153);
-  ellipse(x1, y1, 10, 10);
-  fill(255, 204, 0);
-  ellipse(x2, y2, 10, 10);
-  
+    float x1 = pendulum.l1 * sin(pendulum.theta1);
+    float y1 = pendulum.l1 * cos(pendulum.theta1);
+    float x2 = x1 + pendulum.l2 * sin(pendulum.theta2);
+    float y2 = y1 + pendulum.l2 * cos(pendulum.theta2);
+    
+    x1 *= 100;
+    y1 *= 100;
+    x2 *= 100;
+    y2 *= 100;
+
+    //update shade
+    shade.add(new PVector(x2, y2));
+    
+    if (shade.size() >= SHADE_SIZE) {
+      shade.remove(0);
+    }
+
+    //draw shade
+    for (int i = 0; i < shade.size()-1; ++i) {
+      stroke(128, 255 * (float)i / shade.size(), 218, 255);
+      strokeWeight(2 * (float)i / shade.size());
+      line(shade.get(i).x + random(1), shade.get(i).y + random(1), - (float)i / shade.size(), shade.get(i+1).x + random(1), shade.get(i+1).y + random(1), -(float)(i+1) / shade.size());
+    }
+
+    stroke(130, 82, 1);
+    strokeWeight(0.7);
+    line(0,0, x1, y1);
+    line(x1, y1, x2, y2);
+    noStroke();
+
+    pushMatrix();  
+      translate(x1, y1, 0);
+      fill(201, 192, 187);
+      sphere(3);
+      //add light
+    popMatrix();
+    pushMatrix();
+      translate(x2, y2, 0);
+      //ellipse(x1, y1, 10, 10);
+      fill(229, 228, 226);
+      sphere(5);
+    popMatrix();
+    //ellipse(x2, y2, 10, 10);
+
   popMatrix();
-  //stroke(0);
 }
+
+// void drawGradient(float x, float y) {
+//   int radius = 100;
+//   fill(255);
+//   for (int r = 0; r < radius; r++) { 
+//     print(r,'\n');
+//    print((255/radius)*(radius-r),'\n'); 
+//     fill((255/radius)*(radius-r));
+//     ellipse(x, y, r, r);
+//   }
+// }
 
 class DoublePendulum{
   /**
