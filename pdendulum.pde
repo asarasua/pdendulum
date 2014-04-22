@@ -11,6 +11,10 @@ final int OMEGA_2 = 3;
 final int NUM_EQNS = 4;
 final int SHADE_SIZE = 250;
 
+boolean ending = false;
+boolean phoneTapped = false;
+int tapTime = 0;
+
 ArrayList<PVector> shade;
 
 void setup() {
@@ -26,18 +30,22 @@ void setup() {
   pendulum.m1 = 0.9;
   pendulum.l1 = 0.9;
     
-  pendulum.theta2 = 0.5;
+  pendulum.theta2 = 0.5 + random(-0.0001, 0.0001);
   pendulum.omega2 = 0.0;
   pendulum.m2 = 0.1;
   pendulum.l2 = 0.45;
+  
+  phones.connect();
 }
 
 void draw () {
   pendulum.updateTime(millis());
+  
   background(0);
   lights();
 
-  //pointLight(255, 255, 255, 0, 0, 0);
+  float xoff = 0;
+  
   pushMatrix();
     //Draw pendulum
     translate(width/2, 0);
@@ -53,7 +61,9 @@ void draw () {
     y2 *= 100;
 
     //update shade
-    shade.add(new PVector(x2, y2));
+    if (millis() > 2000){
+      shade.add(new PVector(x2, y2));
+    }
     
     if (shade.size() >= SHADE_SIZE) {
       shade.remove(0);
@@ -61,12 +71,27 @@ void draw () {
 
     //draw shade
     for (int i = 0; i < shade.size()-1; ++i) {
-      stroke(128, 255 * (float)i / shade.size(), 218, 255);
-      strokeWeight(2 * (float)i / shade.size());
-      line(shade.get(i).x + random(1), shade.get(i).y + random(1), - (float)i / shade.size(), shade.get(i+1).x + random(1), shade.get(i+1).y + random(1), -(float)(i+1) / shade.size());
+      //250, 255, 22 yellow
+      stroke(250, 255 * (float)i / shade.size(), 22, map(i, 0, SHADE_SIZE, 10, 255));
+      strokeWeight(5 * (float)i / shade.size());
+      randomizer = millis()/700 * (float)(shade.size()-i) / shade.size();
+      if (phoneTapped){
+        randomizer *= 10;
+        if (millis() > tapTime + 500){
+          phoneTapped = false;
+        }
+      }
+      if (ending){
+        randomizer = 1000;
+      }
+      xoff += 0.05;
+      
+      //line(shade.get(i).x + random(-randomizer,randomizer), shade.get(i).y + random(-randomizer,randomizer), (float)i / shade.size(), shade.get(i+1).x + random(-randomizer,randomizer), shade.get(i+1).y + random(-randomizer,randomizer), (float)(i+1) / shade.size());
+      line(shade.get(i).x + map(noise(xoff), 0, 1, -randomizer,randomizer), shade.get(i).y + map(noise(xoff), 0, 1, -randomizer,randomizer), (float)i / shade.size(), shade.get(i+1).x + map(noise(xoff), 0, 1, -randomizer,randomizer), shade.get(i+1).y + map(noise(xoff), 0, 1, -randomizer,randomizer), (float)(i+1) / shade.size());
     }
 
-    stroke(130, 82, 1);
+    //stroke(130, 82, 1);
+    stroke(200, 200, 200);
     strokeWeight(0.7);
     line(0,0, x1, y1);
     line(x1, y1, x2, y2);
@@ -81,7 +106,8 @@ void draw () {
     pushMatrix();
       translate(x2, y2, 0);
       //ellipse(x1, y1, 10, 10);
-      fill(229, 228, 226);
+      //fill(229, 228, 226);
+      fill(131,156,165);
       sphere(5);
     popMatrix();
     //ellipse(x2, y2, 10, 10);
@@ -89,16 +115,6 @@ void draw () {
   popMatrix();
 }
 
-// void drawGradient(float x, float y) {
-//   int radius = 100;
-//   fill(255);
-//   for (int r = 0; r < radius; r++) { 
-//     print(r,'\n');
-//    print((255/radius)*(radius-r),'\n'); 
-//     fill((255/radius)*(radius-r));
-//     ellipse(x, y, r, r);
-//   }
-// }
 
 class DoublePendulum{
   /**
@@ -256,5 +272,13 @@ class DoublePendulum{
                   - M*l1*yin[OMEGA_1]*yin[OMEGA_1]*sin(delta)
                   - M*g*sin(yin[THETA_2])) / den;
   }
-
 }
+
+phones.onClick(function(id) {
+    phoneTapped = true;
+    tapTime = millis();
+});
+
+sketch.onAboutToStop(function() { 
+  ending = true;
+});
